@@ -37,10 +37,23 @@ public class ScanHub : Hub
             if (string.IsNullOrWhiteSpace(batchNo))
                 return ScanResult.Fail(scannedCode, "Batch number not found for this scan...");
 
-            var rows = _cutList.GetCutRows(batchNo, scannedCode);
+            var rows = _cutList.GetAssemblyRows(batchNo, scannedCode);
             if (rows.Count == 0)
-                return new ScanResult(false, $"No Soufflage (MIR) cut rows found in {batchNo}", scannedCode, batchNo, rows);
+                return new ScanResult(false, $"No Soufflage assembly found in {batchNo}", scannedCode, batchNo, "", 0, 0, new List<CutRow>());
+            
+            var totalWidth = rows.Where(r => r.Sens == "L").Sum(r => double.TryParse(r.DimMM, out var d) ? d : 0);
+            var totalHeight = rows.Where(r => r.Sens == "H").Sum(r => double.TryParse(r.DimMM, out var d) ? d : 0);
 
-            return new ScanResult(true, "OK", scannedCode, batchNo, rows);
+            return new ScanResult(true, "OK", scannedCode, batchNo,
+            rows[0].AssemblyNo, totalWidth, totalHeight,
+            rows.Select(r => {
+                return new CutRow(
+                Description: r.Description,
+                Extrusion:   r.Code,
+                DimMM:       r.DimMM,
+                QtsPiece:    r.PositionNo.ToString(),
+                Sens:        r.Sens
+                );
+            }).ToList());
     }
 }

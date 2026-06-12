@@ -1,20 +1,25 @@
-using Microsoft.AspNetCore.SignalR;
 using AssemblyMX.Models;
-using AssemblyMX.Services;
-using System.Runtime.Versioning;
 
 namespace AssemblyMX.Models;
 
-public record ScanResult(
-    bool Success,          // did everything resolve? drives the green/red state on screen
-    string Message,        // status text ("OK", "Batch not found", "No PA rows", etc.)
-    string ScannedCode,    // echo back what was scanned (helps the operator confirm)
-    string BatchNo,        // the resolved BatchNO (e.g. "260513B-A")
-    List<CutRow> Rows      // the PA## cut rows; empty list on any failure
-)
+public class ScanResult
 {
-    // Convenience factory for the failure case so service code stays readable:
-    // 'return ScanResult.Fail("...")' instead of repeating the full constructor.
-    public static ScanResult Fail(string scannedCode, string message) =>
-        new(false, message, scannedCode, "", new List<CutRow>());
+    public bool Success { get; init; }
+    public string Message { get; init; } = "";
+    public string ScannedCode { get; init; } = "";
+    public string BatchNo { get; init; } = "";
+    public string AssemblyNo { get; init; } = "";
+    public double TotalWidth { get; init; }
+    public double TotalHeight { get; init; }
+    public List<CutRow> Rows { get; init; } = new();
+
+    public ScanResult(bool success, string message, string scannedCode, string batchNo, string assemblyNo, double totalWidth, double totalHeight, List<CutRow> rows)
+    {
+        Success = success; Message = message;
+        ScannedCode = scannedCode; BatchNo = batchNo;
+        AssemblyNo = assemblyNo; TotalWidth = totalWidth; TotalHeight = totalHeight; Rows = rows;
+    }
+
+    public static ScanResult Fail(string code, string msg) =>
+        new(false, msg, code, "", "", 0, 0, new List<CutRow>());
 }
