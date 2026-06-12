@@ -181,7 +181,8 @@
       if (result.success) {
         document.getElementById('batch').childNodes[0].nodeValue = ('Lot: ' + result.batchNo) + ' ';
         document.getElementById('scanDisplay').textContent = 'ASSEMBLY NO. ' + (result.assemblyNo ?? '—');
-        setStatus("Loaded Successfully — " + result.rows.length + " cut(s) for Moulure A Brique", "ok");
+        const positionCount = new Set(result.rows.map(r => r.qtsPiece)).size;
+        setStatus("Loaded Assembly Successfully — " + positionCount + " Positions Loaded for Moulure a Brique", "ok");
         drawRows(result.rows, result.totalWidth, result.totalHeight);
         drawGrid(result.rows, result.scannedCode);
       } else {
